@@ -1,0 +1,398 @@
+{
+	"info": {
+		"_postman_id": "567d61b6-39dc-46a1-9f88-cbb0cc786f23",
+		"name": "Rest Api tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "/register",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a196427c-6279-4176-af95-f9c3c9545ae4",
+						"exec": [
+							"pm.environment.unset(\"access_token\");",
+							"",
+							"random_user = (Math.random().toString(36)+'00000000000000000').slice(2, 6+2)",
+							"",
+							"pm.environment.set(\"random_user\", random_user);",
+							"",
+							"tests[\"Response time is less than 200ms\"] = responseTime < 200;",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"User created successfully\"] = jsonData.message === 'User created successfully.';",
+							"",
+							"",
+							"tests[\"Content-Type is present in response\"] = postman.getResponseHeader('Content-Type');",
+							"tests['Content-Type is application/json'] = postman.getResponseHeader('Content-Type') === 'application/json';",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"password\": \"1234\",\n\t\"username\": \"NikosK\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/register",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/auth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a196427c-6279-4176-af95-f9c3c9545ae4",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"",
+							"pm.environment.set(\"access_token\", jsonData.access_token)",
+							"",
+							"pm.test(\"Status code is 200\", pm.response.to.have.status(200));",
+							"",
+							"pm.test(\"Body contains access_token\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"access_token\");",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response time is less than 150ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(150);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"NikosK\",\n\t\"password\": \"1234\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/auth",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/item/piano",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "JWT {{access_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/item/piano",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"item",
+						"piano"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/store/test_store",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "29796e5d-40e2-4d79-9d0d-212d1daad1ed",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"",
+							"tests[\"Store name is returned\"] = jsonData.name === 'test_store';",
+							"tests[\"Store id is returned\"] = jsonData.id === 1;",
+							"tests[\"Store items are an empty list\"] = jsonData.items.length === 0;",
+							"",
+							"",
+							"pm.test(\"Successful POST request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([201,202]);",
+							"});pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});",
+							"",
+							"pm.environment.set(\"store_id\", jsonData.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/store/test_store",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"store",
+						"test_store"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/item/test_item",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2c20a188-4047-4837-8f50-14bd2b46c5d4",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"",
+							"pm.test('Item name is returned',pm.environment.get(\"test_item\") === 'test_item');",
+							"pm.test('Item price is returned',pm.environment.get(\"price\") === 19.99);",
+							"",
+							"pm.test(\"Successful POST request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([201,202]);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"price\": 19.99,\n\t\"store_id\": {{store_id}}\n}"
+				},
+				"url": {
+					"raw": "{{url}}/item/test_item",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"item",
+						"test_item"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/stores",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0257c7bb-3315-42a6-b483-052ad781934b",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"",
+							"tests[\"store 'test_store' is returned\"] = jsonData.stores[0].name === 'test_store';",
+							"tests[\"Id of store 'test_store' is returned\"] = jsonData.stores[0].id === pm.environment.get(\"store_id\");",
+							"",
+							"tests[\"Item 'test_item price is returned inside 'test_store\"] = jsonData.stores[0].items[0].price === 19.99",
+							"",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/stores",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"stores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/item/test_item",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8a8ef87d-1688-46bc-9473-272423d18871",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Mesage is returned\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Item deleted\");",
+							"});",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/item/test_item",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"item",
+						"test_item"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/store/test_store",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8bc330bd-04f7-41fe-8b92-ea68720c4256",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"",
+							"pm.test(\"Mesage is returned\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Store deleted\");",
+							"});",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"pm.test(\"Content-Type is present\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/store/test_store",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"store",
+						"test_store"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
